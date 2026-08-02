@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homework — Assignment Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #000000;
+    --paper-line: rgba(45,140,255,0.14);
+    --margin-red: #ff3b5c;
+    --ink: #ffffff;
+    --ink-soft: #9db3e0;
+    --tab-yellow: #f0b93d;
+    --tab-mint: #4fe0b0;
+    --tab-lilac: #b18aff;
+    --tab-coral: #ff8f70;
+    --tab-sky: #3d8bff;
+    --done: #4a5578;
+    --card: #050810;
+    --card-hover: #081024;
+    --card-border: #21407e;
+    --muted-card: #9fb3de;
+    --line-on-paper: rgba(45,140,255,0.55);
+    --electric: #2f7bff;
+    --electric-bright: #6fb0ff;
+    --electric-dim: rgba(47,123,255,0.16);
+    --shadow: 0 0 0 1px rgba(45,140,255,0.10), 0 0 16px rgba(47,123,255,0.14);
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image: linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 34px;
+    background-position: 0 130px;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 90px 64px;
+    position: relative;
+  }
+
+  .margin-line {
+    position: absolute;
+    top: 0;
+    left: 36px;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--electric) 0%, rgba(47,123,255,0.25) 340px, rgba(47,123,255,0.25) 100%);
+    opacity: 0.9;
+    box-shadow: 0 0 10px rgba(47,123,255,0.55);
+  }
+
+  /* ---- Header ---- */
+  header { padding: 36px 0 20px 0; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    color: var(--electric-bright);
+    text-transform: uppercase;
+    margin: 0 0 6px 0;
+  }
+
+  header h1 {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: 46px;
+    margin: 0;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 22px rgba(47,123,255,0.25);
+  }
+
+  .progress-wrap {
+    margin-top: 20px;
+    max-width: 420px;
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 7px;
+  }
+
+  #progress-label strong { color: var(--ink); font-weight: 600; }
+  #progress-overdue { color: var(--margin-red); }
+
+  .progress-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #10182c;
+    overflow: hidden;
+    border: 1px solid #1c2c4f;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2f7bff, #6fb0ff);
+    box-shadow: 0 0 10px rgba(111,176,255,0.7);
+    width: 0%;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---- Add form ---- */
+  .add-row {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 16px 14px;
+    margin: 28px 0 26px 0;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr auto auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted-card);
+  }
+
+  .subject-field { position: relative; }
+  .subject-dot {
+    position: absolute;
+    left: 10px;
+    top: 32px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--electric);
+    transition: background 0.2s ease;
+    pointer-events: none;
+  }
+  #in-subject { padding-left: 24px !important; }
+
+  .field input {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    padding: 9px 10px;
+    border: 1px solid #16233f;
+    border-radius: 6px;
+    background: #020509;
+    color: var(--ink);
+    min-width: 0;
+    color-scheme: dark;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field input::placeholder { color: #4b5a80; }
+
+  .field input:focus, #btn-add:focus-visible, .checkbox:focus-visible, .chip:focus-visible, .del-btn:focus-visible {
+    outline: none;
+    border-color: var(--electric-bright);
+    box-shadow: 0 0 0 3px var(--electric-dim);
+  }
+
+  #btn-add {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    background: var(--electric);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 0 14px rgba(47,123,255,0.4);
+    transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+  #btn-add:hover { background: var(--electric-bright); box-shadow: 0 0 20px rgba(111,176,255,0.55); }
+  #btn-add:active { transform: translateY(1px) scale(0.98); }
+
+  @media (max-width: 620px) {
+    .add-row { grid-template-columns: 1fr 1fr; }
+    #btn-add { grid-column: 1 / -1; }
+  }
+
+  /* ---- Filters ---- */
+  .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid #16233f;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { border-color: var(--electric-bright); color: var(--ink); }
+  .chip.active { background: var(--electric); color: #fff; border-color: var(--electric); box-shadow: 0 0 12px rgba(47,123,255,0.4); }
+
+  /* ---- Section groups ---- */
+  .group-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--electric-bright);
+    margin: 24px 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .group-title.overdue { color: var(--margin-red); }
+  .group-title::after { content: ''; flex: 1; height: 1px; background: var(--line-on-paper); }
+
+  .entries { display: flex; flex-direction: column; gap: 9px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px 13px 0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, opacity 0.22s ease, max-height 0.28s ease, margin 0.28s ease, padding 0.28s ease;
+    max-height: 80px;
+  }
+  .card:hover { transform: translateY(-1px); background: var(--card-hover); border-color: var(--electric-bright); }
+
+  .card.card-enter { animation: cardEnter 0.32s cubic-bezier(.2,.8,.3,1); }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card.card-exit {
+    opacity: 0;
+    transform: scale(0.97);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+
+  .tab { width: 8px; align-self: stretch; flex-shrink: 0; }
+
+  .checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2c4270;
+    border-radius: 5px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    background: #020509;
+    transition: all 0.15s ease;
+  }
+  .checkbox:hover { border-color: var(--electric-bright); }
+  .checkbox:checked {
+    background: var(--electric);
+    border-color: var(--electric);
+    box-shadow: 0 0 10px rgba(47,123,255,0.6);
+  }
+  .checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+  }
+  .checkbox.pulse { animation: checkPulse 0.32s ease; }
+  @keyframes checkPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.28); box-shadow: 0 0 0 8px rgba(47,123,255,0.25); }
+    100% { transform: scale(1); }
+  }
+
+  .entry-main { flex: 1; min-width: 0; }
+
+  .entry-title { font-size: 15px; font-weight: 500; color: var(--ink); word-break: break-word; transition: color 0.2s ease; }
+  .card.done .entry-title { color: var(--done); text-decoration: line-through; }
+
+  .entry-subject { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted-card); margin-top: 2px; }
+
+  .due-stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
+    transform: rotate(-2deg);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .due-stamp.overdue { color: var(--margin-red); }
+  .due-stamp.today { color: var(--tab-yellow); }
+  .due-stamp.upcoming { color: var(--electric-bright); }
+  .due-stamp.none { color: #445374; border-style: dashed; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: #445374;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 10px;
+    flex-shrink: 0;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .del-btn:hover { color: var(--margin-red); background: rgba(255,59,92,0.1); }
+
+  .empty {
+    text-align: center;
+    padding: 54px 20px;
+    border: 1.5px dashed rgba(47,123,255,0.4);
+    border-radius: 12px;
+    animation: cardEnter 0.3s ease;
+  }
+  .empty svg { margin-bottom: 14px; opacity: 0.85; }
+  .empty .empty-title {
+    font-family: 'Kalam', cursive;
+    font-size: 19px;
+    color: var(--ink);
+  }
+  .empty .empty-sub {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="margin-line"></div>
+  <header>
+    <p class="eyebrow">Assignment Log</p>
+    <h1>Homework</h1>
+    <div class="progress-wrap">
+      <div class="progress-row">
+        <span id="progress-label">—</span>
+        <span id="progress-overdue"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </header>
+
+  <form class="add-row" id="add-form" autocomplete="off">
+    <div class="field">
+      <label for="in-title">Assignment</label>
+      <input id="in-title" type="text" placeholder="Read chapter 4" required maxlength="120">
+    </div>
+    <div class="field subject-field">
+      <label for="in-subject">Subject</label>
+      <span class="subject-dot" id="subject-dot"></span>
+      <input id="in-subject" type="text" placeholder="History" required maxlength="40">
+    </div>
+    <div class="field">
+      <label for="in-due">Due</label>
+      <input id="in-due" type="date">
+    </div>
+    <button type="submit" id="btn-add">+ Add</button>
+  </form>
+
+  <div class="filters" id="filters">
+    <button class="chip active" data-filter="active">Active</button>
+    <button class="chip" data-filter="all">All</button>
+    <button class="chip" data-filter="done">Done</button>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'homework:items';
+  let items = [];
+  let filter = 'active';
+  let loaded = false;
+  let justAddedId = null;
+
+  const contentEl = document.getElementById('content');
+  const progressLabel = document.getElementById('progress-label');
+  const progressOverdue = document.getElementById('progress-overdue');
+  const progressFill = document.getElementById('progress-fill');
+  const form = document.getElementById('add-form');
+  const filtersEl = document.getElementById('filters');
+  const subjectInput = document.getElementById('in-subject');
+  const subjectDot = document.getElementById('subject-dot');
+
+  const tabColors = ['tab-yellow','tab-mint','tab-lilac','tab-coral','tab-sky'];
+  const tabHex = { 'tab-yellow':'#f0b93d','tab-mint':'#4fe0b0','tab-lilac':'#b18aff','tab-coral':'#ff8f70','tab-sky':'#3d8bff' };
+  const subjectColorMap = {};
+  function colorFor(subject){
+    const key = subject.trim().toLowerCase();
+    if (!key) return 'tab-sky';
+    if (!subjectColorMap[key]){
+      let hash = 0;
+      for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+      subjectColorMap[key] = tabColors[hash % tabColors.length];
+    }
+    return subjectColorMap[key];
+  }
+
+  subjectInput.addEventListener('input', function(){
+    const c = colorFor(subjectInput.value || '');
+    subjectDot.style.background = tabHex[c];
+  });
+  subjectDot.style.background = tabHex['tab-sky'];
+
+  function uid(){ return 'hw_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  function dueCategory(due){
+    if (!due) return 'none';
+    const today = todayStr();
+    if (due < today) return 'overdue';
+    if (due === today) return 'today';
+    return 'upcoming';
+  }
+
+  function formatDue(due){
+    if (!due) return 'No date';
+    const [y,m,d] = due.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    const label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const cat = dueCategory(due);
+    if (cat === 'overdue') return 'Was due ' + label;
+    if (cat === 'today') return 'Due today';
+    return 'Due ' + label;
+  }
+
+  async function load(){
+    try {
+      const res = await window.storage.get(STORAGE_KEY, false);
+      items = res && res.value ? JSON.parse(res.value) : [];
+    } catch (e) { items = []; }
+    loaded = true;
+    render();
+  }
+
+  async function save(){
+    try { await window.storage.set(STORAGE_KEY, JSON.stringify(items), false); }
+    catch (e) { console.error('Could not save', e); }
+  }
+
+  function addItem(title, subject, due){
+    const item = { id: uid(), title: title.trim(), subject: subject.trim(), due: due || '', done: false, createdAt: Date.now() };
+    items.push(item);
+    justAddedId = item.id;
+    save();
+    render();
+  }
+
+  function toggleItem(id){
+    const it = items.find(i => i.id === id);
+    if (it) it.done = !it.done;
+    save();
+    render();
+  }
+
+  function deleteItem(id){
+    items = items.filter(i => i.id !== id);
+    save();
+    render();
+  }
+
+  function cardHTML(it){
+    const cat = dueCategory(it.due);
+    const color = colorFor(it.subject);
+    return `
+      <div class="card ${it.done ? 'done' : ''}" data-id="${it.id}">
+        <div class="tab" style="background: var(--${color})"></div>
+        <input type="checkbox" class="checkbox" ${it.done ? 'checked' : ''} aria-label="Mark ${escapeAttr(it.title)} as ${it.done ? 'not done' : 'done'}">
+        <div class="entry-main">
+          <div class="entry-title">${escapeHTML(it.title)}</div>
+          <div class="entry-subject">${escapeHTML(it.subject)}</div>
+        </div>
+        <div class="due-stamp ${cat}">${formatDue(it.due)}</div>
+        <button class="del-btn" aria-label="Delete ${escapeAttr(it.title)}">✕</button>
+      </div>`;
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function escapeAttr(s){ return escapeHTML(s); }
+
+  function emptyHTML(msg, sub){
+    return `<div class="empty">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="6" width="24" height="32" rx="3" stroke="#3d8bff" stroke-width="2"/>
+        <rect x="16" y="3" width="12" height="6" rx="2" fill="#050810" stroke="#3d8bff" stroke-width="2"/>
+        <path d="M15 22L20 27L29 16" stroke="#6fb0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="empty-title">${msg}</div>
+      <div class="empty-sub">${sub}</div>
+    </div>`;
+  }
+
+  function render(){
+    if (!loaded){
+      contentEl.innerHTML = emptyHTML('Loading…', 'Fetching your assignments.');
+      return;
+    }
+
+    const active = items.filter(i => !i.done);
+    const done = items.filter(i => i.done);
+    const overdueCount = active.filter(i => dueCategory(i.due) === 'overdue').length;
+    const total = items.length;
+
+    if (total === 0){
+      progressLabel.innerHTML = 'No assignments yet';
+      progressOverdue.textContent = '';
+      progressFill.style.width = '0%';
+    } else {
+      progressLabel.innerHTML = `<strong>${done.length} of ${total}</strong> complete`;
+      progressOverdue.textContent = overdueCount > 0 ? `${overdueCount} overdue` : (active.length === 0 ? 'All caught up ✓' : '');
+      progressFill.style.width = Math.round((done.length / total) * 100) + '%';
+    }
+
+    let pool;
+    if (filter === 'active') pool = active;
+    else if (filter === 'done') pool = done;
+    else pool = items;
+
+    if (pool.length === 0){
+      if (filter === 'done') contentEl.innerHTML = emptyHTML('Nothing finished yet', 'Completed assignments will collect here.');
+      else if (filter === 'active' && total > 0) contentEl.innerHTML = emptyHTML('All caught up', "You've cleared everything on your list.");
+      else contentEl.innerHTML = emptyHTML('No homework logged', 'Add your first assignment above to get started.');
+      return;
+    }
+
+    let html = '';
+    if (filter === 'done'){
+      const sorted = [...pool].sort((a,b) => b.createdAt - a.createdAt);
+      html = `<div class="entries">${sorted.map(cardHTML).join('')}</div>`;
+    } else {
+      const groups = { overdue: [], today: [], upcoming: [], none: [] };
+      pool.forEach(i => groups[dueCategory(i.due)].push(i));
+      Object.keys(groups).forEach(k => groups[k].sort((a,b) => (a.due || '9999').localeCompare(b.due || '9999')));
+      const labels = { overdue: 'Overdue', today: 'Due today', upcoming: 'Upcoming', none: 'No date' };
+      ['overdue','today','upcoming','none'].forEach(k => {
+        if (groups[k].length === 0) return;
+        html += `<div class="group-title ${k === 'overdue' ? 'overdue' : ''}">${labels[k]}</div>`;
+        html += `<div class="entries">${groups[k].map(cardHTML).join('')}</div>`;
+      });
+    }
+
+    contentEl.innerHTML = html;
+
+    if (justAddedId){
+      const el = contentEl.querySelector(`[data-id="${justAddedId}"]`);
+      if (el) el.classList.add('card-enter');
+      justAddedId = null;
+    }
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const title = document.getElementById('in-title').value;
+    const subject = document.getElementById('in-subject').value;
+    const due = document.getElementById('in-due').value;
+    if (!title.trim() || !subject.trim()) return;
+    addItem(title, subject, due);
+    form.reset();
+    subjectDot.style.background = tabHex['tab-sky'];
+    document.getElementById('in-title').focus();
+  });
+
+  contentEl.addEventListener('click', function(e){
+    const card = e.target.closest('.card');
+    if (!card) return;
+    const id = card.dataset.id;
+
+    if (e.target.classList.contains('checkbox')){
+      e.target.classList.add('pulse');
+      setTimeout(() => toggleItem(id), 220);
+      return;
+    }
+    if (e.target.classList.contains('del-btn')){
+      card.classList.add('card-exit');
+      card.addEventListener('transitionend', function handler(ev){
+        if (ev.propertyName !== 'opacity') return;
+        card.removeEventListener('transitionend', handler);
+        deleteItem(id);
+      });
+    }
+  });
+
+  filtersEl.addEventListener('click', function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    filter = btn.dataset.filter;
+    [...filtersEl.children].forEach(c => c.classList.toggle('active', c === btn));
+    render();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
